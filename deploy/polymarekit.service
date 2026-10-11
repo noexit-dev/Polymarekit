@@ -1,0 +1,16 @@
+[Unit]
+Description=Polymarekit Django application
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/polymarekit
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/var/www/polymarekit/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 config.wsgi:application
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
