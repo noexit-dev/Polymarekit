@@ -2,14 +2,15 @@
 
 ## Start the project
 
-1. Install **Python 3**, **Node.js**, and **npm**.
-2. Run:
+1. Run:
 
    ```bash
    ./start.sh
    ```
 
-3. Open <http://127.0.0.1:8000/>.
+### Note: if python3, node, or npm fail to install you must verify that it is running on a Ubuntu-based distribution or install the tools manually to work with your OS
+
+2. Open <http://127.0.0.1:8000/>.
 
 `start.sh` installs dependencies, creates the SQLite database tables, builds the CSS, and starts the Django development server. It is safe to run again.
 
