@@ -40,3 +40,11 @@ curl -i http://127.0.0.1/api/health
 ```
 
 The EC2 security group must allow inbound **TCP 80** from your IP (or `0.0.0.0/0` for a public demo). The server must have a public IPv4 address, and the browser URL must be `http://<PUBLIC-IP>/`, not HTTPS. If the local curl succeeds but the browser times out, the security group or an EC2/network firewall is blocking port 80. If local curl fails, inspect the service and nginx logs above.
+
+## Checkpoint 1:
+
+Deliverables:
+- Complete the EC2 setup and app configuration scripts
+- Install dependencies, initialize SQLite, and verify the deployed app is reachable
+
+All deliverables have been addressed in assignment 7.02 and are currently running in the EC2 instance.
