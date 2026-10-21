@@ -1,0 +1,43 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Polymarekit is a prediction market built for horses.">
+    <title>{% block title %}Polymarekit{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  </head>
+  <body class="min-h-screen bg-stone-50 text-slate-900">
+    <header class="border-b border-slate-200 bg-white">
+      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8" aria-label="Main navigation">
+        <a href="{% url 'home' %}" class="flex items-center gap-3" aria-label="Polymarekit home">
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-xl text-white" aria-hidden="true">♞</span>
+          <span class="text-xl font-black tracking-tight text-slate-950">Polymarekit</span>
+        </a>
+        <div class="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
+          <a class="transition hover:text-indigo-600" href="{% url 'home' %}">Markets</a>
+          <a class="transition hover:text-indigo-600" href="/portfolio/">Portfolio</a>
+          <a class="transition hover:text-indigo-600" href="/wallet/">Wallet</a>
+          <a class="transition hover:text-indigo-600" href="/profile/">Profile</a>
+        </div>
+        <a class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" href="/profile/">
+          Sign in
+        </a>
+      </nav>
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer class="border-t border-slate-200 bg-white">
+      <div class="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+        <p>© 2026 Polymarekit. Prediction markets for every horse.</p>
+        <div class="flex gap-5">
+          <a class="hover:text-indigo-600" href="/about/">About</a>
+          <a class="hover:text-indigo-600" href="/trade-history/">Trade history</a>
+          <a class="hover:text-indigo-600" href="/markets/">Browse markets</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
