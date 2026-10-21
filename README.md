@@ -48,3 +48,13 @@ Deliverables:
 - Install dependencies, initialize SQLite, and verify the deployed app is reachable
 
 All deliverables have been addressed in assignment 7.02 and are currently running in the EC2 instance.
+
+## Checkpoint 2:
+
+Deliverables:
+- Set up the Django project templates, Tailwind styling, and shared header/footer
+- Display available markets on the Home Page
+
+Setting up Django project deliverable has been addressed in assignment 7.02 and are currently running in the EC2 instance.
+
+Display available markets on the Home Page deliverable has been addressed in this checkpoint by adding a homepage with placeholder markets.
