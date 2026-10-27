@@ -58,3 +58,17 @@ Deliverables:
 Setting up Django project deliverable has been addressed in assignment 7.02 and are currently running in the EC2 instance.
 
 Display available markets on the Home Page deliverable has been addressed in this checkpoint by adding a homepage with placeholder markets.
+
+## Checkpoint 3
+
+Deliverables:
+
+- Add account creation and deletion
+- Add profile editing and wallet fund updates
+- Populate and retrieve the profile_wallet data
+
+Account creation/deletion deliverable has been addressed in this checkpoint by adding a signup, login, and delete account page with correct linking
+
+Profile editing and wallet fund updates and populate/retireve the profile_wallet data has been addressed in this checkpoint by adding a wallet page with correct linking and database interaction to sqlite server
+
+
