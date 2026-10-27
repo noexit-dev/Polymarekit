@@ -10,23 +10,33 @@
   </head>
   <body class="min-h-screen bg-stone-50 text-slate-900">
     <header class="border-b border-slate-200 bg-white">
-      <nav class="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8" aria-label="Main navigation">
+      <nav class="mx-auto flex max-w-7xl flex-wrap gap-4 items-center justify-between px-6 py-5 lg:px-8" aria-label="Main navigation">
         <a href="{% url 'home' %}" class="flex items-center gap-3" aria-label="Polymarekit home">
           <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-xl text-white" aria-hidden="true">♞</span>
           <span class="text-xl font-black tracking-tight text-slate-950">Polymarekit</span>
         </a>
-        <div class="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
+        <div class="flex flex-wrap items-center gap-4 text-sm font-semibold text-slate-600">
           <a class="transition hover:text-indigo-600" href="{% url 'home' %}">Markets</a>
           <a class="transition hover:text-indigo-600" href="/portfolio/">Portfolio</a>
-          <a class="transition hover:text-indigo-600" href="/wallet/">Wallet</a>
-          <a class="transition hover:text-indigo-600" href="/profile/">Profile</a>
+          <a class="transition hover:text-indigo-600" href="{% url 'wallet' %}">Wallet</a>
+          <a class="transition hover:text-indigo-600" href="{% url 'profile' %}">Profile</a>
         </div>
-        <a class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" href="/profile/">
-          Sign in
-        </a>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}<button class="button" type="submit">Sign out</button>
+        </form>
+        {% else %}
+        <a class="button" href="{% url 'login' %}">Sign in</a>
+        <a class="font-bold text-indigo-700" href="{% url 'signup' %}">Create account</a>
+        {% endif %}
       </nav>
     </header>
 
+    {% if messages %}
+    <div class="mx-auto max-w-7xl px-6 pt-6" role="status">
+      {% for message in messages %}<p class="rounded-lg bg-indigo-50 p-4 text-indigo-900">{{ message }}</p>{% endfor %}
+    </div>
+    {% endif %}
     {% block content %}{% endblock %}
 
     <footer class="border-t border-slate-200 bg-white">

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Create account | Polymarekit{% endblock %}
+{% block content %}
+<main class="account-panel">
+  <h1>Create account</h1>
+  <p>Join the stable. All currencies and funds are fictional.</p>
+  <form method="post" class="account-form">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="button" type="submit">Create account</button>
+  </form>
+  <p class="mt-6"><a href="{% url 'login' %}">Already have an account? Sign in</a></p>
+</main>
+{% endblock %}

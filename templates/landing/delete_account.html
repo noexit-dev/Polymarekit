@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete account | Polymarekit{% endblock %}
+{% block content %}
+<main class="account-panel">
+  <h1>Delete your account?</h1>
+  <p>This permanently deletes your account, profile, and wallet funds. This cannot be undone.</p>
+  <form method="post" class="account-form">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="button bg-rose-700 hover:bg-rose-800" type="submit">Permanently delete my account</button>
+    <a class="ml-4" href="{% url 'profile' %}">Cancel</a>
+  </form>
+</main>
+{% endblock %}

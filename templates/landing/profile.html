@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Profile | Polymarekit{% endblock %}
+{% block content %}
+<main class="account-panel">
+  <div class="mb-4 text-5xl" role="img" aria-label="Horse profile avatar">♞</div>
+  <h1>{{ user.username }}'s profile</h1>
+  <form method="post" class="account-form">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="button" type="submit">Save profile</button>
+  </form>
+  <div class="mt-8 flex flex-wrap gap-6">
+    <a href="{% url 'wallet' %}">View wallet</a>
+    <a class="text-rose-700" href="{% url 'delete_account' %}">Delete account</a>
+  </div>
+</main>
+{% endblock %}

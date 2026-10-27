@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .button { @apply inline-block rounded-lg bg-indigo-600 px-4 py-2 font-bold text-white hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2; }
+  .account-panel { @apply mx-auto my-12 max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 sm:p-10; }
+  .account-panel h1 { @apply mb-4 text-3xl font-black; }
+  .account-form { @apply mt-6 space-y-5; }
+  .account-form label { @apply mb-2 block font-semibold; }
+  .account-form input:not([type="hidden"]), .account-form textarea, .account-form select { @apply block w-full rounded-lg border border-slate-300 bg-white p-3 focus:outline-none focus:ring-2 focus:ring-indigo-500; }
+  .account-form .helptext { @apply mt-2 block text-sm text-slate-600; }
+  .account-form .errorlist { @apply text-sm font-semibold text-rose-700; }
+}

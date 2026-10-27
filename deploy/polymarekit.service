@@ -8,6 +8,7 @@ User=ubuntu
 Group=ubuntu
 WorkingDirectory=/var/www/polymarekit
 Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/var/www/polymarekit/deployment.env
 ExecStart=/var/www/polymarekit/.venv/bin/gunicorn --workers 2 --bind 127.0.0.1:8000 config.wsgi:application
 Restart=on-failure
 RestartSec=5

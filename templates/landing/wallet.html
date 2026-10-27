@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Wallet | Polymarekit{% endblock %}
+{% block content %}
+<main class="account-panel">
+  <h1>Your wallet</h1>
+  <p>All funds are fictional. Add as many as you like within the storage limit.</p>
+  <p class="my-6 text-2xl font-bold">Total: {{ wallet.wallet_total }} items</p>
+  <p class="text-sm text-slate-600">Total counts items across currencies; no conversion rate is applied.</p>
+  <dl class="my-6 grid grid-cols-2 gap-4">
+    {% for currency, amount in balances %}
+    <div class="rounded-lg bg-indigo-50 p-4"><dt>{{ currency }}</dt><dd class="text-xl font-bold">{{ amount }}</dd></div>
+    {% endfor %}
+  </dl>
+  <h2 class="text-xl font-bold">Add fake funds</h2>
+  <form method="post" class="account-form">
+    {% csrf_token %}{{ form.as_p }}
+    <button class="button" type="submit">Add funds</button>
+  </form>
+</main>
+{% endblock %}

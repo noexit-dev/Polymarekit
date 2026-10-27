@@ -61,6 +61,7 @@ printf 'Copying application to %s...\n' "$HOST"
     --exclude 'node_modules/' \
     --exclude '__pycache__/' \
     --exclude 'db.sqlite3' \
+    --exclude 'deployment.env' \
     --exclude 'staticfiles/' \
     "$REPO_DIR/" "${REMOTE_USER}@${HOST}:${REMOTE_DIR}/"
 
@@ -72,6 +73,12 @@ printf 'Installing dependencies and restarting service...\n'
     .venv/bin/python manage.py migrate --noinput && \
     npm run build:css && \
     .venv/bin/python manage.py collectstatic --noinput && \
+    printf '%s\n' 'DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,${HOST}' > deployment.env && \
+    sudo install -m 0644 deploy/${APP_NAME}.service /etc/systemd/system/${APP_NAME}.service && \
+    sudo install -m 0644 deploy/nginx-${APP_NAME}.conf /etc/nginx/sites-available/${APP_NAME} && \
+    sudo nginx -t && \
+    sudo systemctl daemon-reload && \
+    sudo systemctl reload nginx && \
     sudo systemctl restart ${APP_NAME}.service && \
     sudo systemctl is-active --quiet ${APP_NAME}.service && \
     curl --fail --silent --show-error --max-time 10 http://127.0.0.1:8000/api/health && \

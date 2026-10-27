@@ -6,3 +6,4 @@ db.sqlite3
 node_modules/
 .venv/
 staticfiles/
+deployment.env
