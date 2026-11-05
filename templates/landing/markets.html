@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Markets | Polymarekit{% endblock %}
+
+{% block content %}
+<main class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+  <p class="text-sm font-bold uppercase tracking-[0.2em] text-indigo-600">Horse markets</p>
+  <h1 class="mt-2 text-4xl font-black tracking-tight text-slate-950">All markets</h1>
+  <div class="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+    {% for market in markets %}
+      <a href="{{ market.get_absolute_url }}" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg">
+        <div class="flex justify-between gap-4">
+          <span class="text-sm font-bold text-indigo-700">{{ market.category }}</span>
+          <span class="{% if market.trend_direction == 'up' %}text-emerald-600{% else %}text-rose-600{% endif %} font-bold">
+            {% if market.trend_direction == "up" %}+{% else %}-{% endif %}{{ market.trend_percent }}%
+          </span>
+        </div>
+        <h2 class="mt-5 text-xl font-bold">{{ market.name }}</h2>
+        <p class="mt-4 text-3xl font-black">{{ market.current_value }}%</p>
+      </a>
+    {% empty %}
+      <p>No markets are available yet.</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

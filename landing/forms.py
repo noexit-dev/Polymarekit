@@ -24,6 +24,11 @@ class WalletForm(forms.Form):
     amount = forms.IntegerField(min_value=1, max_value=MAX_FUNDS)
 
 
+class MarketActionForm(forms.Form):
+    currency = forms.ChoiceField(choices=[(name, name.capitalize()) for name in CURRENCIES])
+    amount = forms.IntegerField(min_value=1, max_value=MAX_FUNDS)
+
+
 class DeleteAccountForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput, label="Confirm your password")
 

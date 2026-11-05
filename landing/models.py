@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.urls import reverse
 
 
 CURRENCIES = ("carrots", "apples", "horseshoes", "hay")
@@ -21,3 +22,32 @@ class ProfileWallet(models.Model):
     @property
     def wallet_total(self):
         return sum(getattr(self, currency) for currency in CURRENCIES)
+
+
+class Market(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    slug = models.SlugField(max_length=220, unique=True)
+    category = models.CharField(max_length=80)
+    current_value = models.PositiveIntegerField()
+    trend_percent = models.DecimalField(max_digits=5, decimal_places=1)
+    trend_direction = models.CharField(max_length=4, choices=(("up", "Up"), ("down", "Down")))
+    trend_updated_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        ordering = ("name",)
+
+    def get_absolute_url(self):
+        return reverse("market_detail", kwargs={"slug": self.slug})
+
+
+class MarketPosition(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    market = models.ForeignKey(Market, on_delete=models.CASCADE)
+    currency = models.CharField(max_length=20, choices=[(name, name) for name in CURRENCIES])
+    amount = models.PositiveBigIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=("user", "market", "currency"), name="unique_market_position"),
+        ]

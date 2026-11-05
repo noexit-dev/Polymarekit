@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from .models import MAX_FUNDS, ProfileWallet
+from .models import MAX_FUNDS, Market, MarketPosition, ProfileWallet
 
 
 class AccountTests(TestCase):
@@ -95,6 +96,57 @@ class AccountTests(TestCase):
         client.force_login(self.user)
         for name in ("signup", "profile", "wallet", "delete_account", "logout"):
             self.assertEqual(client.post(reverse(name), {}).status_code, 403)
+
+    def test_markets_are_generated_and_trade_actions_use_wallet(self):
+        response = self.client.get(reverse("markets"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Market.objects.count(), 7)
+        market = Market.objects.first()
+        self.assertGreaterEqual(market.current_value, 20)
+        self.assertIn(market.trend_direction, ("up", "down"))
+        detail_url = reverse("market_detail", kwargs={"slug": market.slug})
+        self.assertContains(self.client.get(detail_url), "Sign in")
+
+        self.client.force_login(self.user)
+        self.wallet.carrots = 20
+        self.wallet.save(update_fields=["carrots"])
+        self.assertEqual(self.client.get(detail_url).status_code, 200)
+        self.assertRedirects(self.client.post(detail_url, {
+            "currency": "carrots", "amount": 10, "action": "buy",
+        }), detail_url)
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 10)
+
+        response = self.client.post(detail_url, {
+            "currency": "carrots", "amount": 11, "action": "buy",
+        })
+        self.assertContains(response, "You only have 10 carrots.")
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 10)
+
+        self.assertRedirects(self.client.post(detail_url, {
+            "currency": "carrots", "amount": 5, "action": "sell",
+        }), detail_url)
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 15)
+
+    def test_expired_winning_market_pays_double_and_clears_position(self):
+        self.client.force_login(self.user)
+        self.wallet.carrots = 20
+        self.wallet.save(update_fields=["carrots"])
+        market = Market.objects.create(
+            name="Test market", slug="test-market", category="Racing",
+            current_value=80, trend_percent=5, trend_direction="up",
+            expires_at=timezone.now() + timezone.timedelta(hours=1),
+        )
+        detail_url = reverse("market_detail", kwargs={"slug": market.slug})
+        self.client.post(detail_url, {"currency": "carrots", "amount": 10, "action": "buy"})
+        market.expires_at = timezone.now() - timezone.timedelta(seconds=1)
+        market.save(update_fields=["expires_at"])
+        self.client.get(detail_url)
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 30)
+        self.assertFalse(MarketPosition.objects.filter(user=self.user, market=market).exists())
 
 
 @override_settings(ALLOWED_HOSTS=["market.example"])
