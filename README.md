@@ -71,4 +71,11 @@ Account creation/deletion deliverable has been addressed in this checkpoint by a
 
 Profile editing and wallet fund updates and populate/retireve the profile_wallet data has been addressed in this checkpoint by adding a wallet page with correct linking and database interaction to sqlite server
 
+## Checkpoint 4
 
+Deliverables:
+
+- Populate markets with starting values and generated trends
+- Add market detail views and buy/sell forms
+
+Populate markets is implemented with the Market model.
