@@ -15,4 +15,6 @@ urlpatterns = [
     path("accounts/delete/", views.delete_account, name="delete_account"),
     path("profile/", views.profile, name="profile"),
     path("wallet/", views.wallet, name="wallet"),
+    path("portfolio/", views.portfolio, name="portfolio"),
+    path("trade-history/", views.trade_history, name="trade_history"),
 ]

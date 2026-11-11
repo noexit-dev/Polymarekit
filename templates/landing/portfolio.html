@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Portfolio | Polymarekit{% endblock %}
+{% block content %}
+<main class="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+  <h1 class="text-3xl font-black">Your portfolio</h1>
+  <p class="mt-2 text-slate-600">Open holdings grouped by market and currency. Under the current trading rules, each unit of stake sells for one unit of its currency. Winning positions pay twice their stake at closing.</p>
+  <p class="mt-5 font-bold">Current sale value: {% for currency, amount in totals %}{{ amount }} {{ currency }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  <p class="mt-2 text-slate-600">Estimated payout is stake × 2 × current market probability; it is not a guaranteed return.</p>
+  <div class="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white p-6">
+    <table class="w-full text-left">
+      <caption class="text-lg font-bold">Current holdings</caption>
+      <thead><tr><th scope="col" class="p-3">Market</th><th scope="col" class="p-3">Currency</th><th scope="col" class="p-3">Stake / sale value</th><th scope="col" class="p-3">Market probability</th><th scope="col" class="p-3">Estimated payout</th></tr></thead>
+      <tbody>
+        {% for position in positions %}
+        <tr class="border-t border-slate-200"><td class="p-3"><a class="text-indigo-700 underline" href="{{ position.market.get_absolute_url }}">{{ position.market.name }}</a></td><td class="p-3">{{ position.get_currency_display|capfirst }}</td><td class="p-3">{{ position.amount }}</td><td class="p-3">{{ position.market.current_value }}%</td><td class="p-3">{{ position.estimated_value|floatformat:2 }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="p-3">You have no open holdings. <a class="text-indigo-700 underline" href="{% url 'markets' %}">Browse markets</a> to invest.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <a class="mt-5 inline-block text-indigo-700 underline" href="{% url 'trade_history' %}">View trade history</a>
+</main>
+{% endblock %}

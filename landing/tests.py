@@ -166,3 +166,87 @@ class DeploymentCsrfTests(TestCase):
                 response = client.post(reverse("login"), data,
                                        HTTP_ORIGIN="https://untrusted.example", **headers)
                 self.assertEqual(response.status_code, 403)
+
+
+class InvestmentTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_user("investor")
+        self.wallet = ProfileWallet.objects.create(user=self.user, carrots=100, apples=20)
+        self.market = Market.objects.create(
+            name="Portfolio market", slug="portfolio-market", category="Racing",
+            current_value=80, trend_percent=5, trend_direction="up",
+            expires_at=timezone.now() + timezone.timedelta(hours=1),
+        )
+        self.url = self.market.get_absolute_url()
+        self.client.force_login(self.user)
+
+    def trade(self, action, amount, currency="carrots"):
+        return self.client.post(self.url, {"action": action, "amount": amount, "currency": currency})
+
+    def test_history_and_grouped_holdings(self):
+        from .models import Investment
+        from decimal import Decimal
+
+        for action, amount, currency in [("buy", 20, "carrots"), ("buy", 10, "carrots"),
+                                         ("buy", 5, "apples"), ("sell", 7, "carrots")]:
+            self.assertEqual(self.trade(action, amount, currency).status_code, 302)
+        trades = list(Investment.objects.all())
+        self.assertEqual([(t.transaction_type, t.amount) for t in trades],
+                         [("sell", 7), ("buy", 5), ("buy", 10), ("buy", 20)])
+        self.assertTrue(all(t.profile == self.wallet and t.market == self.market for t in trades))
+        response = self.client.get(reverse("portfolio"))
+        self.assertEqual([(p.currency, p.amount) for p in response.context["positions"]],
+                         [("apples", 5), ("carrots", 23)])
+        self.assertEqual(response.context["positions"][1].estimated_value, Decimal("36.8"))
+        self.assertIn(("Carrots", 23), response.context["totals"])
+        self.assertContains(response, "36.80")
+        self.assertContains(self.client.get(reverse("trade_history")), "Sell")
+        self.trade("sell", 23)
+        self.assertFalse(MarketPosition.objects.filter(user=self.user, currency="carrots").exists())
+        self.assertEqual(Investment.objects.count(), 5)
+
+    def test_rejected_trades_do_not_change_records(self):
+        from .models import Investment
+
+        for action, amount, currency in [("buy", 101, "carrots"), ("sell", 1, "carrots"),
+                                         ("buy", 0, "carrots"), ("buy", 1, "gold"),
+                                         ("invalid", 1, "carrots")]:
+            self.assertEqual(self.trade(action, amount, currency).status_code, 200)
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 100)
+        self.assertFalse(Investment.objects.exists())
+        self.assertFalse(MarketPosition.objects.exists())
+
+    def test_record_failure_rolls_back_trade(self):
+        from unittest.mock import patch
+
+        with patch("landing.views.Investment.objects.create", side_effect=RuntimeError("failed")):
+            with self.assertRaises(RuntimeError):
+                self.trade("buy", 10)
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 100)
+        self.assertFalse(MarketPosition.objects.exists())
+
+    def test_pages_are_private_and_empty_for_other_accounts(self):
+        self.trade("buy", 10)
+        other = get_user_model().objects.create_user("other-investor")
+        self.client.force_login(other)
+        self.assertContains(self.client.get(reverse("portfolio")), "You have no open holdings")
+        self.assertContains(self.client.get(reverse("trade_history")), "You have no recorded trades")
+        self.client.logout()
+        for name in ("portfolio", "trade_history"):
+            self.assertEqual(self.client.get(reverse(name)).status_code, 302)
+
+    def test_settlement_preserves_history_and_account_deletion_removes_it(self):
+        from .models import Investment
+
+        self.trade("buy", 10)
+        self.market.expires_at = timezone.now() - timezone.timedelta(seconds=1)
+        self.market.save(update_fields=["expires_at"])
+        self.assertContains(self.client.get(reverse("portfolio")), "You have no open holdings")
+        self.wallet.refresh_from_db()
+        self.assertEqual(self.wallet.carrots, 110)
+        self.assertEqual(Investment.objects.count(), 1)
+        self.assertContains(self.client.get(reverse("trade_history")), "Portfolio market")
+        self.user.delete()
+        self.assertFalse(Investment.objects.exists())

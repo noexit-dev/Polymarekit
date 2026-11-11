@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 
 from .forms import DeleteAccountForm, MarketActionForm, ProfileForm, WalletForm
-from .models import CURRENCIES, MAX_FUNDS, Market, MarketPosition, ProfileWallet
+from .models import CURRENCIES, MAX_FUNDS, Investment, Market, MarketPosition, ProfileWallet
 
 MARKET_LIFETIME = 60 * 60
 TREND_LIFETIME = 60
@@ -97,6 +97,7 @@ def markets(request):
     return render(request, "landing/markets.html", {"markets": current_markets()})
 
 
+@transaction.atomic
 def market_detail(request, slug):
     ensure_markets()
     market = refresh_market(Market.objects.get(slug=slug))
@@ -121,6 +122,8 @@ def market_detail(request, slug):
                 )
                 position.amount += amount
                 position.save(update_fields=["amount"])
+                Investment.objects.create(profile=wallet, market=market, amount=amount,
+                                          currency=currency, transaction_type="buy")
                 messages.success(request, f"Bought {amount} {currency} of {market.name}.")
                 return redirect(market.get_absolute_url())
         elif action == "sell":
@@ -138,6 +141,8 @@ def market_detail(request, slug):
                 position.save(update_fields=["amount"])
                 if not position.amount:
                     position.delete()
+                Investment.objects.create(profile=wallet, market=market, amount=amount,
+                                          currency=currency, transaction_type="sell")
                 messages.success(request, f"Sold {amount} {currency} of {market.name}.")
                 return redirect(market.get_absolute_url())
         else:
@@ -151,6 +156,23 @@ def market_detail(request, slug):
             if wallet else []
         ),
     })
+
+
+@login_required
+def portfolio(request):
+    for market in Market.objects.filter(marketposition__user=request.user).distinct():
+        refresh_market(market)
+    positions = list(MarketPosition.objects.filter(user=request.user, amount__gt=0)
+                     .select_related("market").order_by("market__name", "currency"))
+    totals = [(currency.capitalize(), sum(p.amount for p in positions if p.currency == currency))
+              for currency in CURRENCIES]
+    return render(request, "landing/portfolio.html", {"positions": positions, "totals": totals})
+
+
+@login_required
+def trade_history(request):
+    trades = Investment.objects.filter(profile__user=request.user).select_related("market")
+    return render(request, "landing/trade_history.html", {"trades": trades})
 
 
 def health(request):

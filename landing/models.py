@@ -1,4 +1,5 @@
 from django.conf import settings
+from decimal import Decimal
 from django.db import models
 from django.urls import reverse
 
@@ -47,7 +48,24 @@ class MarketPosition(models.Model):
     currency = models.CharField(max_length=20, choices=[(name, name) for name in CURRENCIES])
     amount = models.PositiveBigIntegerField()
 
+    @property
+    def estimated_value(self):
+        return Decimal(self.amount) * self.market.current_value * 2 / 100
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=("user", "market", "currency"), name="unique_market_position"),
         ]
+
+
+class Investment(models.Model):
+    profile = models.ForeignKey(ProfileWallet, on_delete=models.CASCADE)
+    market = models.ForeignKey(Market, on_delete=models.PROTECT)
+    amount = models.PositiveBigIntegerField()
+    currency = models.CharField(max_length=20, choices=[(name, name) for name in CURRENCIES])
+    transaction_type = models.CharField(max_length=4, choices=(("buy", "Buy"), ("sell", "Sell")))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "investments"
+        ordering = ("-created_at", "-pk")
