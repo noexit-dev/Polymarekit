@@ -79,3 +79,10 @@ Deliverables:
 - Add market detail views and buy/sell forms
 
 Populate markets is implemented with the Market model.
+
+## Checkpoint 5
+
+Deliverables:
+
+- Store each buy and sell transaction in the investments table
+- Display current holdings and the user’s complete trade history
